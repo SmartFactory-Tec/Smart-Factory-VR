@@ -81,7 +81,7 @@ public class ModBusSocket : MonoBehaviour
         missionData.robotStatus = (RobotStatus) data[5];
         missionData.distance = data[6];
 
-        missionData.currentPosition = new Vector2(ModbusToUnityFloat(data[7]), ModbusToUnityFloat(data[8]));
+        missionData.currentPosition = new Vector2(ModbusToUnityFloat(data[7], offsetx), ModbusToUnityFloat(data[8], offsety));
         
         Debug.Log(missionData.currentPosition);
         
@@ -94,14 +94,14 @@ public class ModBusSocket : MonoBehaviour
         return missionData;
     }
 
-    private float ModbusToUnityFloat(ushort data)
+    private float ModbusToUnityFloat(ushort data, float offset)
     {
         bool positive = (data / 100) == 10;
         int x = data % 1000 / 100;
         
         float digits = data % 100 / 100f;
         
-        return positive ? 1 : -1 * (x + digits) - offsetx;
+        return positive ? 1 : -1 * (x + digits) - offset;
     }
 
     private ushort UnityFloatToModbus(float input)
