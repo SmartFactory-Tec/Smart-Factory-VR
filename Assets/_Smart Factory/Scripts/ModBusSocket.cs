@@ -81,26 +81,7 @@ public class ModBusSocket : MonoBehaviour
         missionData.robotStatus = (RobotStatus) data[5];
         missionData.distance = data[6];
 
-        //Get two first digits of data[7] and data[8]
-        bool positiveX = (data[7] / 100) == 10;
-        bool positiveY = (data[8] / 100) == 10;
-
-        //Get 3rd digit of data[7] and data[8]
-        int x = data[7] % 1000 / 100;
-        int y = data[8] % 1000 / 100;
-        
-        Debug.Log("X: " + x + " Y: " + y);
-
-        //Get 4th and 5th digit of data[7] and data[8]
-        float xDigits = data[7] % 100 / 100f;
-        float yDigits = data[8] % 100 / 100f;
-        
-        Debug.Log("XDig: " + xDigits + " YDig: " + yDigits);
-
-        float finalPosX = positiveX ? 1 : -1 * (x + xDigits) - offsetx;
-        float finalPosY = positiveY ? 1 : -1 * (y + yDigits) - offsety;
-
-        missionData.currentPosition = new Vector2(finalPosX, finalPosY);
+        missionData.currentPosition = new Vector2(ModbusToUnityFloat(data[7]), ModbusToUnityFloat(data[8]));
         
         Debug.Log(missionData.currentPosition);
         
@@ -112,5 +93,21 @@ public class ModBusSocket : MonoBehaviour
         
         return missionData;
     }
-    
+
+    private float ModbusToUnityFloat(ushort data)
+    {
+        bool positive = (data / 100) == 10;
+        int x = data % 1000 / 100;
+        
+        float digits = data % 100 / 100f;
+        
+        return positive ? 1 : -1 * (x + digits) - offsetx;
+    }
+
+    private ushort UnityFloatToModbus(float input)
+    {
+        //TODO: Implement this
+        
+        return 0;
+    }
 }
