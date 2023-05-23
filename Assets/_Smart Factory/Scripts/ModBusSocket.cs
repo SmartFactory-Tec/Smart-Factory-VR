@@ -122,7 +122,7 @@ public class ModBusSocket : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    private int UnityFloatToModbus(float data)
+    public int UnityFloatToModbus(float data)
     {
         int positive = data >= 0 ? 10000 : 11000;
 
