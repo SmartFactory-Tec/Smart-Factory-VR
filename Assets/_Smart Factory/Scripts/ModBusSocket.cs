@@ -140,8 +140,8 @@ public class ModBusSocket : MonoBehaviour
         Vector2Int targetModbus = UnityVector2ToModbus(target);
         
         newData[0] = (ushort)MissionStatus.Move;
-        newData[7] = (ushort)targetModbus.x;
-        newData[8] = (ushort)targetModbus.y;
+        newData[1] = (ushort)targetModbus.x;
+        newData[2] = (ushort)targetModbus.y;
         
         Debug.Log("Writing " + newData[1] + ", " + newData[2]);
         

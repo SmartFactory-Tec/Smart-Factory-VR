@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class SetRobotTargetTest : MonoBehaviour
 {
-    public void Trolling()
+    public ModBusSocket socket;
+    public void Test()
     {
-        FindObjectOfType<ModBusSocket>().SetRobotTarget(new Vector2(transform.localPosition.x, transform.localPosition.z));
+        socket.SetRobotTarget(new Vector2(transform.localPosition.x, transform.localPosition.z));
     }
 }
 
@@ -18,9 +19,9 @@ public class SetRobotTargetTestEditor : UnityEditor.Editor
     {
         base.OnInspectorGUI();
 
-        if (GUILayout.Button("Trolling"))
+        if (GUILayout.Button("Test"))
         {
-            ((SetRobotTargetTest)target).Trolling();
+            ((SetRobotTargetTest)target).Test();
         }
     }
 }
