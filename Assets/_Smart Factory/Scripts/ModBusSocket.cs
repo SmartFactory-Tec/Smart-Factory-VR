@@ -41,11 +41,14 @@ public class ModBusSocket : MonoBehaviour
     }
 
     [SerializeField] private Transform robot;
+    [SerializeField] private Transform robot2;
 
     private void UpdateRobot(MissionData missionData)
     {
         robot.localPosition = new Vector3(missionData.currentPosition.x, 0, missionData.currentPosition.y);
         robot.eulerAngles = new Vector3(0, missionData.angle, 0);
+        robot2.localPosition = new Vector3(missionData.currentPosition2.x, 0, missionData.currentPosition2.y);
+        robot2.eulerAngles = new Vector3(0, missionData.angle2, 0);
     }
 
     private void PrintArrayInLine(ushort[] array)
@@ -74,15 +77,17 @@ public class ModBusSocket : MonoBehaviour
         MissionData missionData = new MissionData();
 
         missionData.status = (MissionStatus)data[0];
-
+        missionData.status2 = (MissionStatus)data[15];
         missionData.goalPosition = new Vector2(data[1], data[2]);
         missionData.angle = data[3];
+        missionData.angle2 = data[19];
 
         missionData.battery = data[4];
         missionData.robotStatus = (RobotStatus)data[5];
         missionData.distance = data[6];
 
         missionData.currentPosition = ModbusPosToUnityVector2(data[7], data[8]);
+        missionData.currentPosition2 = ModbusPosToUnityVector2(data[23], data[24]);
         Debug.Log($"Input: {data[7]}, {data[8]} | Output: {missionData.currentPosition.x}, {missionData.currentPosition.y}");
 
         missionData.goalPositionPi = new Vector2(data[9], data[10]);
@@ -115,7 +120,7 @@ public class ModBusSocket : MonoBehaviour
     {
         float fx = position.x + offsetx;
         float fy = position.y + offsety;
-        
+
         int x = UnityFloatToModbus(fx);
         int y = UnityFloatToModbus(fy);
 
@@ -128,7 +133,7 @@ public class ModBusSocket : MonoBehaviour
 
         int x = Mathf.Abs((int)data);
 
-        int digits = (int)Math.Abs(((Math.Round(Mathf.Abs(data),2) - x) * 100));
+        int digits = (int)Math.Abs(((Math.Round(Mathf.Abs(data), 2) - x) * 100));
 
         return positive + x * 100 + digits;
     }
@@ -136,15 +141,26 @@ public class ModBusSocket : MonoBehaviour
     public void SetRobotTarget(Vector2 target)
     {
         ushort[] newData = lastData;
-        
+
         Vector2Int targetModbus = UnityVector2ToModbus(target);
-        
+
         newData[0] = (ushort)MissionStatus.Move;
         newData[1] = (ushort)targetModbus.x;
         newData[2] = (ushort)targetModbus.y;
-        
+
         Debug.Log("Writing " + newData[1] + ", " + newData[2]);
-        
+
+        master.WriteMultipleRegisters(startAddress, newData);
+    }
+
+    public void missions(ushort x, ushort y, ushort address)
+    {
+        ushort[] newData = lastData;
+
+        newData[0 + address] = (ushort)MissionStatus.Move;
+        newData[1 + address] = x;
+        newData[2 + address] = y;
+
         master.WriteMultipleRegisters(startAddress, newData);
     }
 }

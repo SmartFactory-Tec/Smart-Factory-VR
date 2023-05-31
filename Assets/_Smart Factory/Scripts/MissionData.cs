@@ -7,12 +7,15 @@ namespace _Smart_Factory.Scripts
     public struct MissionData
     {
         public MissionStatus status;
+        public MissionStatus status2;
         public Vector2 goalPosition;
         public float angle;
         public float battery;
         public RobotStatus robotStatus;
         public float distance;
         public Vector2 currentPosition;
+        public Vector2 currentPosition2;
+        public float angle2;
         
         public Vector2 goalPositionPi;
         public Vector2 currentPositionPi;
