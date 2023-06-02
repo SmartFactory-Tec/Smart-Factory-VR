@@ -1,107 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 using UnityEngine.XR.OpenXR;
-//using Valve.VR;
+using UnityEngine.XR;
 
-/*public class ViveControllerScript : MonoBehaviour
+public class ViveControllerScript : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public Vector3 pointedPosition;
 
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (SteamVR_Input.GetStateDown("Trigger", SteamVR_Input_Sources.Any))
-        {
-            RaycastHit hit;
-
-            //Get position and direciton of the controller
-            var controller = GetComponent<SteamVR_Behaviour_Pose>();
-            var position = controller.transform.position;
-            var direction = controller.transform.forward;
-
-            //Perform a raycast to find the object or point of intersection
-            if (Physics.Raycast(position, direction, out hit))
-            {
-                //Save the pointed position
-                pointedPosition = hit.point;
-                Debug.Log(pointedPosition);
-            }
-        }
-    }
-} */
-
-
-public class ViveControllerScript : MonoBehaviour {
-    //Varibles
-    private InputDevice controllerDevice;
-    private bool isTriggerPressed = false;
-    private bool errorMess = true;
-
+    private XRNode controllerNode;
+    public GameObject floor;
+    public ModBusSocket socket;
     private void Start()
     {
-        //Find controller input device
-        InputDevices.deviceConnected += OnDeviceConnected;
-    }
-
-    private void OnDeviceConnected(InputDevice device) {
-        if (device.characteristics.HasFlag(InputDeviceCharacteristics.Controller))
-        {
-            controllerDevice = device;
-        }
+        controllerNode = XRNode.LeftHand;
     }
 
     private void Update()
     {
-        if (controllerDevice.isValid)
+
+        InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.triggerButton, out bool triggerValue);
+
+        if (triggerValue)
         {
-            //Get the position and rotation of the controller
             Vector3 controllerPosition;
             Quaternion controllerRotation;
 
-            if (controllerDevice.TryGetFeatureValue(CommonUsages.devicePosition, out controllerPosition)
-                && controllerDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out controllerRotation))
+            InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.devicePosition, out controllerPosition);
+            InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.deviceRotation, out controllerRotation);
+
+            RaycastHit hit;
+
+            if (Physics.Raycast(controllerPosition, controllerRotation * Vector3.forward, out hit))
             {
-                //Convert the controller pose to world space
-                Vector3 worldPosition = transform.TransformPoint(controllerPosition);
-                Vector3 worldDiretion = transform.TransformDirection(controllerRotation * Vector3.forward);
+                Vector3 hitPosition = hit.point;
+                //hitPosition.x -= 3.45f;
+                //hitPosition.z -= 2.13f;
 
-                //Check if the trigger is pressed
-                bool triggerValue;
-                if (controllerDevice.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue))
-                {
-                    if (triggerValue && !isTriggerPressed)
-                    {
-                        isTriggerPressed = true;
+                Vector3 hitPositionFloor = floor.transform.InverseTransformPoint(hitPosition);
 
-                        //Perform a raycast from the controllers position and direction
-                        RaycastHit hit;
+                //Action
+                Debug.Log("Hit Position: " + hitPosition);
+                socket.SetRobotTarget(new Vector2(hitPosition.x, hitPosition.z));
 
-                        if (Physics.Raycast(worldPosition, worldDiretion, out hit))
-                        {
-                            //Use the hit.point as the position where the controller is pointing
-                            Vector3 pointedPosition = hit.point;
-
-                            //Use the position of the position for desired purposes
-                            Debug.Log(pointedPosition);
-                        }
-                    }
-                    else if (!triggerValue && isTriggerPressed)
-                    {
-                        isTriggerPressed = false;
-                    }
-                }
-            }
-        }
-        else 
-        {
-            if (errorMess)
-            {
-                errorMess = false;
-                Debug.Log("No controller deteced");
             }
         }
     }
