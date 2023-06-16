@@ -52,9 +52,10 @@ public class ModBusSocket : MonoBehaviour
         robot.eulerAngles = new Vector3(0, missionData.angle, 0);
         robot2.localPosition = new Vector3(missionData.currentPosition2.x, 0, missionData.currentPosition2.y);
         robot2.eulerAngles = new Vector3(0, missionData.angle2, 0);
-
+        
         Vector2 pos = ModbusPosToUnityVector2((ushort)missionData.goalPosition.x, (ushort)missionData.goalPosition.y);
         targetDebug.localPosition = new Vector3(pos.x, 0, pos.y);
+
     }
 
     private void PrintArrayInLine(ushort[] array)
@@ -127,28 +128,23 @@ public class ModBusSocket : MonoBehaviour
         float fx = position.x + offsetx;
         float fy = position.y + offsety;
 
-        int x = UnityFloatToModbus(fx);
-        int y = UnityFloatToModbus(fy);
+        short x = UnityFloatToModbus(fx);
+        short y = UnityFloatToModbus(fy);
 
         return new Vector2Int(x, y);
     }
 
-    private int UnityFloatToModbus(float data)
+    private short UnityFloatToModbus(float data)
     {
-        //Convert float data to modbus format:
-        //  5 digits total.
-        //  First 2 digits are positive or negative; 10 for positive, 11 for negative.
-        //  Next digit is the integer part of the number.
-        //  Last 2 digits are the decimal part of the number.
+        //Opposite of ModbusToUnityFloat
+        bool positive = data >= 0;
+        data = Mathf.Abs(data);
         
-        int sign = data < 0 ? 11 : 10;
-        int x = Mathf.Abs((int)data);
+        int x = (int)data;
         int digits = (int)((data - x) * 100);
+        
+        var result = (short)(positive ? x * 100 + digits : x * 100 + digits + 1000);
 
-        int result = sign * 1000 + x * 100 + digits;
-        
-        Debug.Log("Converted " + data + " to " + result + "");
-        
         return result;
     }
 
@@ -163,9 +159,13 @@ public class ModBusSocket : MonoBehaviour
         newData[2] = (ushort)targetModbus.y;
 
         Debug.Log("Writing " + newData[1] + ", " + newData[2]);
-
-        if(master != null)
-            master.WriteMultipleRegisters(startAddress, newData);
+        
+        if (master == null)
+        {
+            Debug.LogError("Master is null");
+            return;
+        }
+        master.WriteMultipleRegisters(startAddress, newData);
     }
 
     public void missions(ushort x, ushort y, ushort address)
