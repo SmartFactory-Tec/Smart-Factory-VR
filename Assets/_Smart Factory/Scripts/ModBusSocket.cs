@@ -40,16 +40,23 @@ public class ModBusSocket : MonoBehaviour
             UpdateRobot(ParseDataToMissionData(newData));
             lastData = newData;
         }
+        
+        //Lerp robot to target
+        robot.localPosition = Vector3.Lerp(robot.localPosition, targetPos, Time.deltaTime * 5);
+        robot.localRotation = Quaternion.Lerp(robot.localRotation, targetRot, Time.deltaTime * 5);
     }
 
     [SerializeField] private Transform robot;
     [SerializeField] private Transform robot2;
     [SerializeField] private Transform targetDebug;
 
+    [SerializeField] private Vector3 targetPos;
+    [SerializeField] private Quaternion targetRot;
+    
     private void UpdateRobot(MissionData missionData)
     {
-        robot.localPosition = new Vector3(missionData.currentPosition.x, 0, missionData.currentPosition.y);
-        robot.eulerAngles = new Vector3(0, missionData.angle, 0);
+        targetPos = new Vector3(missionData.currentPosition.x, 0, missionData.currentPosition.y);
+        targetRot = Quaternion.Euler(new Vector3(0, missionData.angle, 0));
         robot2.localPosition = new Vector3(missionData.currentPosition2.x, 0, missionData.currentPosition2.y);
         robot2.eulerAngles = new Vector3(0, missionData.angle2, 0);
         
@@ -136,16 +143,27 @@ public class ModBusSocket : MonoBehaviour
 
     private short UnityFloatToModbus(float data)
     {
+        Debug.Log("--------------------");
+        Debug.Log("Input " + data);
+        
         //Opposite of ModbusToUnityFloat
-        bool positive = data >= 0;
-        data = Mathf.Abs(data);
-        
-        int x = (int)data;
-        int digits = (int)((data - x) * 100);
-        
-        var result = (short)(positive ? x * 100 + digits : x * 100 + digits + 1000);
+        string output = data >= 0 ? "10" : "11";
+        Debug.Log(output);
 
-        return result;
+        int integer = Mathf.Abs((int)Math.Truncate(data));
+        
+        output += integer.ToString("0");
+        Debug.Log(output);
+        
+        float digits = Mathf.Abs(data) - integer;
+        Debug.Log("Digits " + digits);
+        Debug.Log(digits.ToString("0.00"));
+
+        output += digits.ToString("0.00")[2..];
+        
+        Debug.Log(output);
+        
+        return short.Parse(output);
     }
 
     public void SetRobotTarget(Vector2 target)
