@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.OpenXR;
 
+
 public class VRButton : XRBaseInteractable
 {
     [Header("Renderer")]
@@ -16,11 +17,13 @@ public class VRButton : XRBaseInteractable
     [SerializeField] private Material pressedMaterial;
     [SerializeField] private Material Rojomaterial;
     ModBusSocket socket;
+    ViveControllerScript freeMotion;
     private void Start()
     {
 
         GameObject objeto = GameObject.Find("ModBusSocket");
         socket = objeto.GetComponent<ModBusSocket>();
+        buttonRenderer.material = regularMaterial;
     }
     protected override void OnHoverEntered(HoverEnterEventArgs args)
     {
@@ -45,7 +48,7 @@ public class VRButton : XRBaseInteractable
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
-
+        
         base.OnSelectEntered(args);
 
         if (interactorsSelecting.Count != 1) return;
@@ -69,21 +72,25 @@ public class VRButton : XRBaseInteractable
             case "LeftArrow (4)": //Entregar yummy
                 socket.missions(10466, 10595, 0);
                 break;
-            case "RightArrow (0)": //MODULA ROBOT 2
-                socket.missions(10754, 10502, 15);
+            case "LeftArrow (5)":
+                Debug.Log("Free Motion activated");
+                freeMotion.Update();
                 break;
-            case "RightArrow (1)": //CARGA
-                socket.missions(11071, 11138, 15);
-                break;
-            case "RightArrow (2)": //Entregar paquete
-                socket.missions(10385, 10360, 15);
-                break;
-            case "RightArrow (3)": //Sacar paquete
-                socket.missions(10342, 10208, 15);
-                break;
-            case "RightArrow (4)": //Entregar yummy
-                socket.missions(10466, 10595, 15);
-                break;
+            //case "RightArrow (0)": //MODULA ROBOT 2
+            //    socket.missions(10754, 10502, 15);
+            //    break;
+            //case "RightArrow (1)": //CARGA
+            //    socket.missions(11071, 11138, 15);
+            //    break;
+            //case "RightArrow (2)": //Entregar paquete
+            //    socket.missions(10385, 10360, 15);
+            //    break;
+            //case "RightArrow (3)": //Sacar paquete
+            //    socket.missions(10342, 10208, 15);
+            //    break;
+            //case "RightArrow (4)": //Entregar yummy
+            //    socket.missions(10466, 10595, 15);
+            //    break;
             //case "LeftArrow (5)": //Pick es del XARM y aún no está implementado
             //    socket.missions(10466, 10595, 0);
             //    break;

@@ -13,7 +13,7 @@ public class ViveControllerScript : MonoBehaviour
         controllerNode = XRNode.LeftHand;
     }
 
-    private void Update()
+    public void Update()
     {
 
         InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.triggerButton, out bool triggerValue);
