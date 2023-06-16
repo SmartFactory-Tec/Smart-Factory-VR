@@ -133,15 +133,23 @@ public class ModBusSocket : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    public int UnityFloatToModbus(float data)
+    private int UnityFloatToModbus(float data)
     {
-        int positive = data >= 0 ? 10000 : 11000;
-
+        //Convert float data to modbus format:
+        //  5 digits total.
+        //  First 2 digits are positive or negative; 10 for positive, 11 for negative.
+        //  Next digit is the integer part of the number.
+        //  Last 2 digits are the decimal part of the number.
+        
+        int sign = data < 0 ? 11 : 10;
         int x = Mathf.Abs((int)data);
+        int digits = (int)((data - x) * 100);
 
-        int digits = (int)Math.Abs(((Math.Round(Mathf.Abs(data), 2) - x) * 100));
-
-        return positive + x * 100 + digits;
+        int result = sign * 1000 + x * 100 + digits;
+        
+        Debug.Log("Converted " + data + " to " + result + "");
+        
+        return result;
     }
 
     public void SetRobotTarget(Vector2 target)
