@@ -1,46 +1,50 @@
 using UnityEngine;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR;
+using System;
 
 public class ViveControllerScript : MonoBehaviour
 {
 
-    private XRNode controllerNode;
-    public GameObject floor;
+    private XRNode controllerNode = XRNode.RightHand;
+    public Transform robotOrigin;
     public ModBusSocket socket;
-    private void Start()
-    {
-        controllerNode = XRNode.LeftHand;
-    }
+
+    public Transform debug;
+    public Transform rightController;
+
+    [NonSerialized] public bool useFreemovement;
+
+    bool lastValue;
 
     public void Update()
     {
+        if (!useFreemovement) return;
 
         InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.triggerButton, out bool triggerValue);
 
-        if (triggerValue)
+        if (triggerValue && !lastValue)
         {
-            Vector3 controllerPosition;
-            Quaternion controllerRotation;
-
-            InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.devicePosition, out controllerPosition);
-            InputDevices.GetDeviceAtXRNode(controllerNode).TryGetFeatureValue(CommonUsages.deviceRotation, out controllerRotation);
-
-            RaycastHit hit;
-
-            if (Physics.Raycast(controllerPosition, controllerRotation * Vector3.forward, out hit))
+            if (Physics.Raycast(rightController.position, rightController.rotation* Vector3.forward, out var hit))
             {
                 Vector3 hitPosition = hit.point;
                 //hitPosition.x -= 3.45f;
                 //hitPosition.z -= 2.13f;
 
-                Vector3 hitPositionFloor = floor.transform.InverseTransformPoint(hitPosition);
+                debug.position = hitPosition;
+
+                Vector3 hitPositionFloor = robotOrigin.transform.InverseTransformPoint(hitPosition);
 
                 //Action
                 Debug.Log("Hit Position: " + hitPosition);
-                socket.SetRobotTarget(new Vector2(hitPosition.x, hitPosition.z));
+                //socket.SetRobotTarget(new Vector2(hitPositionFloor.x, hitPositionFloor.z));
+                Vector2 targetPos = new Vector2(hitPosition.x, hitPosition.z);
+                var modbusPos = socket.UnityVector2ToModbus(targetPos);
 
+                socket.missions((ushort)modbusPos.x, (ushort)modbusPos.y, 0);
             }
         }
+
+        lastValue = triggerValue;
     }
 }

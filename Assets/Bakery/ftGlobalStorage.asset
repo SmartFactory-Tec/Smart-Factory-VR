@@ -403,10 +403,10 @@ MonoBehaviour:
   uvOverlapAssetList: 00000000ffffffff
   xatlasWarningShown: 0
   foundCompatibleSetup: 1
-  gpuName: NVIDIA GeForce GTX 1060 with Max-Q Design
+  gpuName: NVIDIA Quadro RTX 4000
   runsNonRTX: 1
-  runsOptix5: 1
-  runsOptix6: 1
+  runsOptix5: 0
+  runsOptix6: 0
   runsOptix7: 1
   runsOIDN: 1
   alwaysEnableRTX: 0
@@ -472,12 +472,12 @@ MonoBehaviour:
   renderSettingsHoleFilling: 0
   renderSettingsBeepOnFinish: 0
   renderSettingsExportTerrainAsHeightmap: 1
-  renderSettingsRTXMode: 0
+  renderSettingsRTXMode: 1
   renderSettingsLightProbeMode: 1
   renderSettingsClientMode: 0
   renderSettingsServerAddress: 127.0.0.1
   renderSettingsUnwrapper: 0
-  renderSettingsDenoiserType: 5
+  renderSettingsDenoiserType: 100
   renderSettingsExportTerrainTrees: 0
   renderSettingsShowPerf: 1
   renderSettingsSampleDiv: 1

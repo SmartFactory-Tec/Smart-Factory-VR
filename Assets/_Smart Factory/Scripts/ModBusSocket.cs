@@ -19,6 +19,8 @@ public class ModBusSocket : MonoBehaviour
     const ushort startAddress = 0;
     const ushort numRegisters = 43;
 
+    [SerializeField] ViveControllerScript freeMotion;
+
     public void Awake()
     {
         //Using NModBus4 library connect to ModBus TCP
@@ -42,6 +44,7 @@ public class ModBusSocket : MonoBehaviour
 
     [SerializeField] private Transform robot;
     [SerializeField] private Transform robot2;
+    [SerializeField] private Transform targetDebug;
 
     private void UpdateRobot(MissionData missionData)
     {
@@ -49,6 +52,9 @@ public class ModBusSocket : MonoBehaviour
         robot.eulerAngles = new Vector3(0, missionData.angle, 0);
         robot2.localPosition = new Vector3(missionData.currentPosition2.x, 0, missionData.currentPosition2.y);
         robot2.eulerAngles = new Vector3(0, missionData.angle2, 0);
+
+        Vector2 pos = ModbusPosToUnityVector2((ushort)missionData.goalPosition.x, (ushort)missionData.goalPosition.y);
+        targetDebug.localPosition = new Vector3(pos.x, 0, pos.y);
     }
 
     private void PrintArrayInLine(ushort[] array)
@@ -78,7 +84,7 @@ public class ModBusSocket : MonoBehaviour
 
         missionData.status = (MissionStatus)data[0];
         missionData.status2 = (MissionStatus)data[15];
-        missionData.goalPosition = new Vector2(data[1], data[2]);
+        missionData.goalPosition = new Vector2Int(data[1], data[2]);
         missionData.angle = data[3];
         missionData.angle2 = data[19];
 
@@ -116,7 +122,7 @@ public class ModBusSocket : MonoBehaviour
         return positive ? 1 : -1 * (x + digits);
     }
 
-    private Vector2Int UnityVector2ToModbus(Vector2 position)
+    public Vector2Int UnityVector2ToModbus(Vector2 position)
     {
         float fx = position.x + offsetx;
         float fy = position.y + offsety;
@@ -150,7 +156,8 @@ public class ModBusSocket : MonoBehaviour
 
         Debug.Log("Writing " + newData[1] + ", " + newData[2]);
 
-        master.WriteMultipleRegisters(startAddress, newData);
+        if(master != null)
+            master.WriteMultipleRegisters(startAddress, newData);
     }
 
     public void missions(ushort x, ushort y, ushort address)
@@ -161,6 +168,70 @@ public class ModBusSocket : MonoBehaviour
         newData[1 + address] = x;
         newData[2 + address] = y;
 
-        master.WriteMultipleRegisters(startAddress, newData);
+
+        if(master != null)
+            master.WriteMultipleRegisters(startAddress, newData);
+    }
+
+    public void SetPredeterminedMission(int mission)
+    {
+        PredeterminedMission predMission = (PredeterminedMission)mission;
+
+        switch (predMission)
+        {
+            case PredeterminedMission.Modula: //MODULA
+                missions(10754, 10502, 0);
+                break;
+            case PredeterminedMission.ChargeStation: //CARGA
+                missions(11071, 11138, 0);
+                break;
+            case PredeterminedMission.DeliverPackage: //Entregar paquete
+                missions(10385, 10360, 0);
+                break;
+            case PredeterminedMission.PickPackage: //Sacar paquete
+                missions(10342, 10208, 0);
+                break;
+            case PredeterminedMission.DeliverYummy: //Entregar yummy
+                missions(10466, 10595, 0);
+                break;
+            case PredeterminedMission.FreeMovement: //Free Motion
+                Debug.Log("Free Motion activated");
+                freeMotion.useFreemovement = !freeMotion.useFreemovement;
+                //freeMotion.Update();
+                break;
+            //case "RightArrow (0)": //MODULA ROBOT 2
+            //    socket.missions(10754, 10502, 15);
+            //    break;
+            //case "RightArrow (1)": //CARGA
+            //    socket.missions(11071, 11138, 15);
+            //    break;
+            //case "RightArrow (2)": //Entregar paquete
+            //    socket.missions(10385, 10360, 15);
+            //    break;
+            //case "RightArrow (3)": //Sacar paquete
+            //    socket.missions(10342, 10208, 15);
+            //    break;
+            //case "RightArrow (4)": //Entregar yummy
+            //    socket.missions(10466, 10595, 15);
+            //    break;
+            //case "LeftArrow (5)": //Pick es del XARM y aún no está implementado
+            //    socket.missions(10466, 10595, 0);
+            //    break;
+            default:
+                break;
+
+        }
+
+        Debug.Log("Setting mission to " + predMission);
+    }
+
+    public enum PredeterminedMission
+    {
+        Modula,
+        DeliverPackage,
+        PickPackage,
+        DeliverYummy,
+        ChargeStation,
+        FreeMovement
     }
 }

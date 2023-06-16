@@ -8,7 +8,7 @@ namespace _Smart_Factory.Scripts
     {
         public MissionStatus status;
         public MissionStatus status2;
-        public Vector2 goalPosition;
+        public Vector2Int goalPosition;
         public float angle;
         public float battery;
         public RobotStatus robotStatus;

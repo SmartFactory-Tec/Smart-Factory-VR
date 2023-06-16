@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class UR5e_Controller : MonoBehaviour
 {
@@ -12,6 +13,34 @@ public class UR5e_Controller : MonoBehaviour
     [SerializeField] private GameObject jointIndicator;
 
     private Dictionary<int, JointIndicator> indicators = new Dictionary<int, JointIndicator>();
+
+    [SerializeField] private Transform buttonParent;
+
+    private void Awake()
+    {
+        int i = 0;
+        foreach (Transform child in buttonParent)
+        {
+            XRSimpleInteractable[] buttons = child.GetComponentsInChildren<XRSimpleInteractable>();
+
+            foreach(var button in buttons)
+            {
+                if (button.transform.parent.name.StartsWith("Left"))
+                {
+                    button.selectEntered.AddListener(delegate { NegativeMoveJoint(i);});
+                    button.selectExited.AddListener(delegate { StopJoint(i); });
+                }
+                else
+                {
+                    button.selectEntered.AddListener(delegate { PositiveMoveJoint(i); });
+                    button.selectExited.AddListener(delegate { StopJoint(i); });
+                }
+
+            }
+
+            i++;
+        }
+    }
 
     private void Update()
     {
@@ -91,7 +120,7 @@ public class UR5e_Controller : MonoBehaviour
         public Joint joint = Joint.Base;
         public Axis axis = Axis.X;
         public Transform jointTransform;
-        [Range(0f, 50f)] public float turnRate = 10f;
+        [Range(0f, 50f)] public float turnRate = 15f;
         [Range(0, 360)] public float minAngle;
         [Range(0, 360)] public float maxAngle;
 

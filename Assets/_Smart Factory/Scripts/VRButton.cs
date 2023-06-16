@@ -25,6 +25,8 @@ public class VRButton : XRBaseInteractable
         socket = objeto.GetComponent<ModBusSocket>();
         buttonRenderer.material = regularMaterial;
     }
+
+    /*
     protected override void OnHoverEntered(HoverEnterEventArgs args)
     {
         base.OnHoverEntered(args);
@@ -44,7 +46,7 @@ public class VRButton : XRBaseInteractable
 
         buttonRenderer.material = regularMaterial;
 
-    }
+    }*/
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
@@ -52,10 +54,10 @@ public class VRButton : XRBaseInteractable
         base.OnSelectEntered(args);
 
         if (interactorsSelecting.Count != 1) return;
-        Debug.Log(socket);
+        //Debug.Log(socket);
         buttonRenderer.material = Rojomaterial;
 
-        switch (gameObject.name)
+        /*switch (gameObject.name)
         {
             case "LeftArrow (0)": //MODULA
                 socket.missions(10754, 10502, 0);
@@ -72,7 +74,7 @@ public class VRButton : XRBaseInteractable
             case "LeftArrow (4)": //Entregar yummy
                 socket.missions(10466, 10595, 0);
                 break;
-            case "LeftArrow (5)":
+            case "LeftArrow (5)": //Free Motion
                 Debug.Log("Free Motion activated");
                 freeMotion.Update();
                 break;
@@ -97,10 +99,7 @@ public class VRButton : XRBaseInteractable
             default:
                 break;
 
-        }
-
-
-
+        }*/
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
