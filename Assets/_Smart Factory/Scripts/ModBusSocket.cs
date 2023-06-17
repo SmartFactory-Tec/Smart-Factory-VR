@@ -30,8 +30,6 @@ public class ModBusSocket : MonoBehaviour
 
     private ushort[] lastData = new ushort[numRegisters];
 
-    private bool init = true;
-    
     private void Update()
     {
         ushort[] newData = master.ReadHoldingRegisters(startAddress, numRegisters);
@@ -40,20 +38,12 @@ public class ModBusSocket : MonoBehaviour
         {
             PrintArrayInLine(newData);
             UpdateRobot(ParseDataToMissionData(newData));
-
-            if (init)
-            {
-                robot.position = targetPos;
-                init = false;
-            }
-            
             lastData = newData;
         }
         
-        //Move robot transform at 0.75m/s to target
-        robot.position = Vector3.MoveTowards(robot.position, targetPos, Time.deltaTime * 0.75f);
-        robot.rotation = Quaternion.RotateTowards(robot.rotation, targetRot, Time.deltaTime * 90f);
-
+        //Lerp robot to target
+        robot.localPosition = Vector3.Lerp(robot.localPosition, targetPos, Time.deltaTime * 5);
+        robot.localRotation = Quaternion.Lerp(robot.localRotation, targetRot, Time.deltaTime * 5);
     }
 
     [SerializeField] private Transform robot;
