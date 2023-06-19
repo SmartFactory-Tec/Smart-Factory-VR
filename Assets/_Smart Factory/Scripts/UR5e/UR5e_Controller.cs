@@ -16,8 +16,9 @@ public class UR5e_Controller : MonoBehaviour
 
     [SerializeField] private Transform buttonParent;
 
-    private void Awake()
+    private void Start()
     {
+        return;
         int i = 0;
         foreach (Transform child in buttonParent)
         {
@@ -64,6 +65,8 @@ public class UR5e_Controller : MonoBehaviour
     {
         if (indicators.ContainsKey(joint)) return;
 
+        Debug.Log("Indicating joint " + joint);
+
         JointIndicator indicator = Instantiate(jointIndicator).GetComponent<JointIndicator>();
         indicator.gameObject.SetActive(true);
 
@@ -106,6 +109,7 @@ public class UR5e_Controller : MonoBehaviour
 
     public void NegativeMoveJoint(int joint)
     {
+        Debug.Log("Negative move joint " + joint);
         robotJoints[joint].moveValue = -1f;
     }
 
