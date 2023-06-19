@@ -130,6 +130,7 @@ public class ModBusSocket : MonoBehaviour
         return positive ? 1 : -1 * (x + digits);
     }
 
+    //TODO: Fix conversion from unity to modbus values!
     public Vector2Int UnityVector2ToModbus(Vector2 position)
     {
         float fx = position.x + offsetx;
